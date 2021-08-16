@@ -92,7 +92,7 @@ func GetAssets(ctx context.Context, dataChannel chan AssetData, sendData *bool) 
 
 		if *sendData {
 			// Fetch Data
-			coinsData, err := getTopNCoins(100)
+			coinsData, err := getTopNCoins(150)
 			if err != nil {
 				finalErr = err
 				return
@@ -117,15 +117,17 @@ func GetAssets(ctx context.Context, dataChannel chan AssetData, sendData *bool) 
 	})
 }
 
-// GetTopCoinData serves 7 Day price history for top 3 (by market cap) coins
-func GetTopCoinData(ctx context.Context, dataChannel chan AssetData, sendData *bool) error {
+// GetTopCoinData serves 7 Day price history for top 3 (by market cap) or selected coins
+func GetTopCoinData(ctx context.Context, dataChannel chan AssetData, sendData *bool, ids []string) error {
 
 	// Init Client
 	geckoClient := gecko.NewClient(nil)
 
 	// Set Parameters
 	vsCurrency := "usd"
-	ids := []string{}
+	if ids == nil {
+		ids = []string{}
+	}
 	order := geckoTypes.OrderTypeObject.MarketCapDesc
 	perPage := 3
 	page := 1
@@ -151,10 +153,11 @@ func GetTopCoinData(ctx context.Context, dataChannel chan AssetData, sendData *b
 				return
 			}
 
-			topCoinData := make([][]float64, 3)
-			topCoins := make([]string, 3)
-			maxPrices := make([]float64, 3)
-			minPrices := make([]float64, 3)
+			topCoinData := make([][]float64, perPage)
+			topCoins := make([]string, perPage)
+			maxPrices := make([]float64, perPage)
+			minPrices := make([]float64, perPage)
+			marketCapRanks := make([]int16, perPage)
 
 			// Set Prices, Max and Min
 			for i, val := range *coinDataPointer {
@@ -162,6 +165,7 @@ func GetTopCoinData(ctx context.Context, dataChannel chan AssetData, sendData *b
 				topCoinData[i] = val.SparklineIn7d.Price
 				maxPrices[i] = utils.MaxFloat64(topCoinData[i]...)
 				minPrices[i] = utils.MinFloat64(topCoinData[i]...)
+				marketCapRanks[i] = val.MarketCapRank
 
 				// Clean data for graph
 				for index := range topCoinData[i] {
@@ -174,6 +178,7 @@ func GetTopCoinData(ctx context.Context, dataChannel chan AssetData, sendData *b
 			data.MinPrices = minPrices
 			data.TopCoinData = topCoinData
 			data.TopCoins = topCoins
+			data.Ranks = marketCapRanks
 			data.IsTopCoinData = true
 
 			// Send data

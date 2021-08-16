@@ -558,7 +558,7 @@ func DisplayAllCoins(ctx context.Context, dataChannel chan api.AssetData, sendDa
 				// Update Top Coin data
 				for i, v := range data.TopCoinData {
 					// Set title to coin name
-					page.TopCoinGraphs[i].Title = fmt.Sprintf(" %s (7D) ", data.TopCoins[i])
+					page.TopCoinGraphs[i].Title = fmt.Sprintf(" %s (7D) - Rank #%d", data.TopCoins[i], data.Ranks[i])
 
 					// Update value graphs
 					page.TopCoinGraphs[i].Data["Value"] = v

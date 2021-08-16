@@ -60,6 +60,7 @@ type AssetData struct {
 	MaxPrices     []float64
 	MinPrices     []float64
 	TopCoins      []string
+	Ranks         []int16
 	AllCoinData   geckoTypes.CoinsMarket
 }
 

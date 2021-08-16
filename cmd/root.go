@@ -54,7 +54,7 @@ var rootCmd = &cobra.Command{
 
 		// Fetch Top 3 coin history
 		eg.Go(func() error {
-			return api.GetTopCoinData(ctx, dataChannel, &sendData)
+			return api.GetTopCoinData(ctx, dataChannel, &sendData, []string{"bitcoin", "ethereum", "nano"})
 		})
 
 		// Display UI for overall coins
